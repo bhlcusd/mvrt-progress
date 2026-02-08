@@ -20,45 +20,57 @@ public class CoralManipulator extends SubsystemBase {
 
   private enum ManipulatorState {
     FORCE,
-    AUTO;
+    AUTO,
+    STOP;
   }
 
   /** Creates a new CoralManipulator. */
   public CoralManipulator() {
     this.state = ManipulatorState.AUTO;
-
-    // TODO: Invert a motor (manually place negative values for the right motor)
   }
 
+  // Cycle through each control state
   public void toggleControl() {
-    if (state == ManipulatorState.FORCE) {
-      state = ManipulatorState.AUTO;
-    } else {
-      state = ManipulatorState.FORCE;
+    switch (state) {
+      case AUTO:
+        state = ManipulatorState.FORCE;
+        break;
+      case FORCE:
+        state = ManipulatorState.STOP;
+        break;
+      case STOP:
+        state = ManipulatorState.AUTO;
+        break;
     }
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    if (state == ManipulatorState.FORCE) {
-      if (!sensorRear.get() && !sensorFront.get()) {
-        motorLeft.set(SPEED);
-        motorRight.set(-SPEED);
-      } else {
-        motorLeft.set(0);
-        motorRight.set(0);
-      }
-    } else {
-      if (sensorRear.get()) {
-        motorLeft.set(SPEED);
-        motorRight.set(-SPEED);
-      }
+    switch (state) {
+      case AUTO:
+        if (sensorRear.get()) {
+          motorLeft.set(SPEED);
+          motorRight.set(-SPEED);
+        }
 
-      if (sensorFront.get()) {
+        if (sensorFront.get()) {
+          motorLeft.set(0);
+          motorRight.set(0);
+        }
+      case FORCE:
+        if (!sensorRear.get() && !sensorFront.get()) {
+          motorLeft.set(SPEED);
+          motorRight.set(-SPEED);
+        } else {
+          motorLeft.set(0);
+          motorRight.set(0);
+
+          // Uncomment following line to reset to AUTO after detection stops
+          // state = ManipulatorState.AUTO;
+        }
+      case STOP:
         motorLeft.set(0);
         motorRight.set(0);
-      }
     }
   }
 }
