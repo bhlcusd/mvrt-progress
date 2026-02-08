@@ -22,7 +22,6 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
   private final Climber climber = new Climber();
-  private final Climb climb = new Climb(climber);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -40,7 +39,6 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    climber.setDefaultCommand(climb);
     m_driverController.a().onTrue(new Climb(climber));
   }
 
